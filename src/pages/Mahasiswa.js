@@ -123,6 +123,19 @@ const fectData = async () =>{
                 setValidation(error.Response.data);
             }
         };
+        const handleDelete = (id) => {
+            axios
+            .delete(`http://localhost:3000/api/mhs/delete/${id}`)
+            .then((Response) => {
+                console.log('Data berhasil dihapus');
+                const updatedMhs = mhs.filter((item) => item.id !== id);
+                setMhs(updatedMhs);
+            })
+            .catch((error) => {
+                console.error('Gagal Menghapus data:', error);
+                alert('Gagal menghapus data.silahkan coba lagi.');
+            });
+        };
     return(
         <Container>
             <Row>
@@ -139,6 +152,8 @@ const fectData = async () =>{
                             <th scope="col">Jurusan</th>
                             <th scope="col">gambar</th>
                             <th scope="col">gambar</th>
+                            <th scope="col" colSpan={2}>Action</th>
+                            
                         </tr>
                     </thead>
                     <tbody>
@@ -155,6 +170,7 @@ const fectData = async () =>{
                                     <img src={url + mh.swa_foto} height="100" />
                                 </td>
                                 <td>.<button onClick={()=>handleShowEditModal(mh)} classname='btn btn-sm btn-info'>Edit</button></td>
+                                <td>.<button onClick={()=>handleDelete(mh.id_Maha)} classname='btn btn-sm btn-danger'>Delete</button></td>
                             </tr>   
                         ))}
                     </tbody>
