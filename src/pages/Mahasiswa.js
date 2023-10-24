@@ -71,6 +71,58 @@ const fectData = async () =>{
         setValidation(error,Response.data);
     }
     };
+        const [editData, setEditData] = useState({
+            id: null,
+            nama:'',
+            nrp:'',
+            id_jurusan:''
+        });
+        const [showEditModal, setShowEditModal] = useState(false);
+        const handleShowEditModal = (data) =>{
+            setEditData(data);
+            setShowEditModal(true);
+            setShow(false);
+        };
+        const handleCloseEditModal = () =>{
+            setShowEditModal(false);
+            setEditData(null);
+        };
+        const handleEditDataChange = (field, value) => {
+            setEditData((prevData) =>({
+                ...prevData,
+                [field]:value,
+            }));
+        };
+        const handleUpdate = async(e) =>{
+            e.preventDefault();
+            const formData = new FormData();
+
+            formData.append('id_Maha',editData.id_Maha);
+            formData.append('nama',editData.nama);
+            formData.append('nrp',editData.nrp);
+            formData.append('id_jurusan',editData.id_jurusan);
+            
+            if(editData.gambar){
+                formData.append('gambar',editData.gambar);
+            }
+            if(editData.swa_foto){
+                formData.append('swa_foto',editData.swa_foto);
+            }
+
+            try{
+                await axios.patch(`http://localhost:3000/api/mhs/update/${editData.id_Maha}`,formData, {
+                    headers:{
+                        'Content-Type':'multipart/form-data',
+                    }
+                });
+                navigate('/mhs');
+                fectData();
+                setShowEditModal(false);
+            }catch(error){
+                console.error('kesalahan:',error);
+                setValidation(error.Response.data);
+            }
+        };
     return(
         <Container>
             <Row>
@@ -83,6 +135,7 @@ const fectData = async () =>{
                         <tr>
                             <th scope="col">No</th>
                             <th scope="col">Nama</th>
+                            <th scope="col">NRP</th>
                             <th scope="col">Jurusan</th>
                             <th scope="col">gambar</th>
                             <th scope="col">gambar</th>
@@ -93,6 +146,7 @@ const fectData = async () =>{
                             <tr>
                                 <td>{index + 1}</td>
                                 <td>{mh.nama}</td>
+                                <td>{mh.nrp}</td>
                                 <td>{mh.nama_jurusan}</td>
                                 <td>
                                     <img src={url + mh.gambar} height="100" />
@@ -100,6 +154,7 @@ const fectData = async () =>{
                                 <td>
                                     <img src={url + mh.swa_foto} height="100" />
                                 </td>
+                                <td>.<button onClick={()=>handleShowEditModal(mh)} classname='btn btn-sm btn-info'>Edit</button></td>
                             </tr>   
                         ))}
                     </tbody>
@@ -140,6 +195,71 @@ const fectData = async () =>{
                         <button onClick={handleClose} type="submit" className="btn btn-primary"> Send</button>
                     </form>
                 </Modal.Body>
+            </Modal>
+            <Modal show={showEditModal} onHide={handleCloseEditModal}>
+              <Modal.Header closeButton>
+                <Modal.Title>Edit Data</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <form onSubmit={handleUpdate}>
+                  <div className="mb-3">
+                    <label className="form-label">Nama:</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={editData ? editData.nama : ''}
+                      onChange={(e) => handleEditDataChange('nama', e.target.value)}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">NRP:</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={editData ? editData.nrp : ''}
+                      onChange={(e) => handleEditDataChange('nrp', e.target.value)}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Jurusan:</label>
+                    <select
+                      className="form-select"
+                      defaultValue={editData ? editData.id_jurusan : ''}
+                      onChange={(e) => handleEditDataChange('id_jurusan', e.target.value)}
+                    >
+                        <option value={""}>
+                          Select Jurusan
+                        </option>
+                      {jrs.map((jr) => (
+                        <option key={jr.id_jurusan} value={jr.id_jurusan}>
+                          {jr.nama_jurusan}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Gambar:</label>
+                    <input
+                      type="file"
+                      className="form-control"
+                      accept="image/*"
+                      onChange={(e) => handleEditDataChange('gambar', e.target.files[0])}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Swa Foto:</label>
+                    <input
+                      type="file"
+                      className="form-control"
+                      accept="image/*"
+                      onChange={(e) => handleEditDataChange('swa_foto', e.target.files[0])}
+                    />
+                  </div>
+                  <button type="submit" className="btn btn-primary">
+                    Simpan Perubahan
+                  </button>
+                </form>
+              </Modal.Body>
             </Modal>
         </Container>
     );
