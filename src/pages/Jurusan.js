@@ -2,6 +2,8 @@ import { Container, Row, Col, Button, Modal } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+const token = localStorage.getItem('token');
+axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
 function Jurusan() {
   const [jrs, setJrsn] = useState([]);
@@ -13,9 +15,16 @@ function Jurusan() {
   }, []);
 
   const fetchData = async () => {
-    const response1 = await axios.get("http://localhost:3000/api/jrs");
-    const data1 = await response1.data.data;
-    setJrsn(data1);
+    try{
+      const headers = {
+        Authorization:`Bearer ${token}`,
+      };
+      const response1 = await axios.get("http://localhost:3000/api/jrs",{headers});
+      const data1 = await response1.data.data;
+      setJrsn(data1);
+    }catch(error){
+      console.error('gagal mengambil data',error)
+    }
   };
 
   const [show, setShow] = useState(false);
@@ -39,6 +48,7 @@ function Jurusan() {
       await axios.post("http://localhost:3000/api/jrs/store", formData, {
         headers: {
           "Content-Type": "application/json",
+          'Authorization':`Bearer ${token}`,
         },
       });
       navigate("/jrsn");
@@ -88,6 +98,7 @@ function Jurusan() {
         {
           headers: {
             "Content-Type": "application/json",
+            'Authorization':`Bearer ${token}`,
           },
         }
       );
@@ -102,7 +113,11 @@ function Jurusan() {
 
   const handleDelete = (id_jurusan) => {
     axios
-      .delete(`http://localhost:3000/api/jrs/delete/${id_jurusan}`)
+      .delete(`http://localhost:3000/api/jrs/delete/${id_jurusan}`,{
+        headers:{
+          Authorization:`Bearer ${token}`,
+        }
+      })
       .then((response) => {
         console.log("Data Berhasil Dihapus");
 
@@ -188,18 +203,13 @@ function Jurusan() {
                 <td>{jrs.nama_jurusan}</td>
                 <td>
                   <button
-                    onClick={() => handleShowEditModal(jrs)}
-                    className="btn btn-sm btn-info"
-                  >
-                    Edit
+                  onClick={() => handleShowEditModal(jrs)} className="btn btn-sm btn-info">Edit
                   </button>
                 </td>
                 <td>
                   <button
                     onClick={() => handleDelete(jrs.id_jurusan)}
-                    className="btn btn-sm btn-danger"
-                  >
-                    Hapus
+                    className="btn btn-sm btn-danger">Hapus
                   </button>
                 </td>
               </tr>
